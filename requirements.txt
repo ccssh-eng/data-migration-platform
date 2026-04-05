@@ -1,0 +1,8 @@
+pandas
+sqlalchemy
+psycopg2-binary
+python-dotenv
+pytest
+testcontainers
+prometheus-client
+pyodbc
