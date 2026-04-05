@@ -1,15 +1,23 @@
-name: Data Migration Pipeline
+name: Data Migration Pipeline 
+
 on: [push, pull_request]
+
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
+
       - name: Install dependencies
         run: pip install -r requirements.txt
+
       - name: Run pipeline
-        run: python3 scripts/main.py
+        run: |
+          pwd
+          python3 -m scripts.main
