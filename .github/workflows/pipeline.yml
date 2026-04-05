@@ -1,4 +1,4 @@
-name: Data Migration Pipeline 
+name: Data Migration Pipeline
 
 on: [push, pull_request]
 
@@ -15,9 +15,18 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run pipeline
         run: |
-          pwd
-          python3 -m scripts.main
+          pip install -r requirements.txt
+          pip install ruff black
+
+      # LINT
+      - name: Run Ruff (lint)
+        run: ruff check .
+
+      # FORMAT CHECK (ne modifie pas, juste vérifie)
+      - name: Vérifier la mise en forme avec Black
+        run: black --check .
+
+      # RUN PIPELINE
+      - name: Run pipeline
+        run: python3 -m scripts.main

@@ -6,3 +6,5 @@ pytest
 testcontainers
 prometheus-client
 pyodbc
+ruff
+black

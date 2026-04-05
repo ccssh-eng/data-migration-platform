@@ -1,6 +1,8 @@
+from datetime import datetime
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime
+
 from scripts.main import run_pipeline
 
 with DAG(
@@ -9,8 +11,4 @@ with DAG(
     schedule_interval="@daily",
     catchup=False,
 ) as dag:
-
-    run = PythonOperator(
-        task_id="run_pipeline",
-        python_callable=run_pipeline
-    )
+    run = PythonOperator(task_id="run_pipeline", python_callable=run_pipeline)

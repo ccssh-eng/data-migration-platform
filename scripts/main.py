@@ -1,12 +1,14 @@
 import time
+
 import pandas as pd
+from prometheus_client import Counter, Gauge, Histogram, start_http_server
 from sqlalchemy import create_engine
-from scripts.transform import transform
-from scripts.load_data import load
-from scripts.utils import retry
-from scripts.logger import get_logger
-from prometheus_client import start_http_server, Counter, Gauge, Histogram
+
 from scripts.config_loader import get_source_db_url
+from scripts.load_data import load
+from scripts.logger import get_logger
+from scripts.transform import transform
+from scripts.utils import retry
 
 logger = get_logger()
 
@@ -20,6 +22,7 @@ pipeline_duration = Histogram("pipeline_duration_seconds", "La durée du pipelin
 
 # Start metrics server
 start_http_server(8000)
+
 
 @pipeline_duration.time()
 def run_pipeline():
@@ -52,6 +55,7 @@ def run_pipeline():
     pipeline_status.set(1)
 
     logger.info("Le Pipeline a terminé avec succès")
+
 
 if __name__ == "__main__":
     while True:
