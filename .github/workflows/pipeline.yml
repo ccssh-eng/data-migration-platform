@@ -23,7 +23,7 @@ jobs:
       - name: Run Ruff (lint)
         run: ruff check .
 
-      # FORMAT CHECK (ne modifie pas, juste vérifie)
+      # FORMAT CHECK (je ne modifie pas, juste vérifie)
       - name: Vérifier la mise en forme avec Black
         run: black --check .
 

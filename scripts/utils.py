@@ -13,7 +13,5 @@ def retry(func, max_attempts=3, delay=5):
                 logger.info(f"Réessayer dans {delay}s...")
                 time.sleep(delay)
             else:
-                logger.critical(
-                    "Les tentatives maximales ont été réalisées.Pipeline a échoué."
-                )
+                logger.critical("Les tentatives maximales ont été réalisées.Pipeline a échoué.")
                 raise
