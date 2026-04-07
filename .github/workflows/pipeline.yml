@@ -31,4 +31,4 @@ jobs:
       - name: Run pipeline
         run: |
           export PYTHONPATH=$PYTHONPATH:.
-          python3 -m scripts.main.py
+          python3 -m scripts.main
