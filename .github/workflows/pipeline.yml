@@ -30,5 +30,6 @@ jobs:
       # RUN PIPELINE
       - name: Run pipeline
         run: |
+          find . -name "__pycache__" -type d -exec rm -r {} +
           export PYTHONPATH=$PYTHONPATH:.
           python3 -m scripts.main.py
