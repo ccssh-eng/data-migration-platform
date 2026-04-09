@@ -16,18 +16,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      #1.
+      # 1. Checkout code principal
       - name: Checkout main repo
-        uses: actions/checkout@v3 
-
-      # 2. Checkout ADF publish branch dans dossier séparé
-      - name: Checkout ADF publish branch
         uses: actions/checkout@v3
-        with:
-          repository: ${{ github.repository }}
-          ref: adf_publish
-          path: adf_publish
-          fetch-depth: 0
+
+      # 2. Clone explicitement la branche adf_publish
+      - name: Clone ADF publish branch
+        run: |
+          git clone --branch adf_publish https://github.com/${{ github.repository }} adf_publish
 
       # 3.
       - name: Login to Azure
