@@ -8,8 +8,9 @@ on:
 env:
   ACR_NAME: ${{ secrets.ACR_NAME }}
   IMAGE_NAME: data-migration
-  RESOURCE_GROUP: ${{ secrets.RG_NAME }}
+  RG_NAME: ${{ secrets.RG_NAME }}
   ADF_NAME: ${{ secrets.ADF_NAME }}
+  AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
 
 jobs:
   build-and-deploy:
@@ -78,3 +79,9 @@ jobs:
             --factory-name $ADF_NAME \
             --resource-group $RG_NAME \
             --name pipeline-migration
+
+      - name: Debug env
+        run: |
+          echo "RG_NAME=$RG_NAME"
+          echo "ADF_NAME=$ADF_NAME"
+          echo "ACR_NAME=$ACR_NAME"
