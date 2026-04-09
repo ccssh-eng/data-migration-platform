@@ -16,30 +16,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      #1.
+      - name: Checkout main repo
+        uses: actions/checkout@v3 
 
-      # 2. Login Azure
+      # 2.
+      - name: Checkout ADF publish branch
+        uses: actions/checkout@v3
+        with:
+          ref: adf_publish
+          path: adf_publish
+
+      # 3.
       - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # 3. Build Docker
+      # 4.
       - name: Build Docker image
         run: |
           docker build -t $ACR_NAME.azurecr.io/$IMAGE_NAME:latest .
 
-      # 4. Login ACR
+      # 5.
       - name: Login to ACR
         run: az acr login --name $ACR_NAME
 
-      # 5. Push image
+      # 6.
       - name: Push Docker image
         run: docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:latest
 
-      # 6. Deploy ADF via ARM 
+      # 7. 
       - name: Deploy Azure Data Factory (ARM)
         run: |
           az deployment group create \
@@ -47,10 +54,17 @@ jobs:
             --template-file adf_publish/ARMTemplateForFactory.json \
             --parameters adf_publish/ARMTemplateParametersForFactory.json
 
-      # 7. Run pipeline
+      # 8.
       - name: Run ADF pipeline
         run: |
           az datafactory pipeline create-run \
             --factory-name $(jq -r '.parameters.factoryName.value' adf_publish/ARMTemplateParametersForFactory.json) \
             --resource-group $RG_NAME \
             --name pipeline-migration
+
+      - name: Debug files
+        run: |
+          echo "=== ROOT ==="
+          ls -R
+          echo "=== ADF ==="
+          ls -R adf_publish
