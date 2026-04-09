@@ -1,0 +1,74 @@
+name: Deploy ETL to Azure
+
+on:
+  push:
+    branches:
+      - main       # DECLENCHE SUR CHAQUE PUSH VERS MAIN
+
+env:
+  ACR_NAME: ${{ secrets.ACR_NAME }}
+  IMAGE_NAME: data-migration
+  RESOURCE_GROUP: ${{ secrets.RG_NAME }}
+  ADF_NAME: ${{ secrets.ADF_NAME }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. CHECKOUT CODE
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. LOGIN AZURE
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 3. CONSTRUIRE UNE IMAGE DOCKER
+      - name: Build Docker image
+        run: |
+          docker build -t $ACR_NAME.azurecr.io/$IMAGE_NAME:latest .
+
+      # 4. CONNECTER A AZURE CONTAINER REGISTRY
+      - name: Login to ACR
+        run: |
+          az acr login --name $ACR_NAME
+
+      # 5. POUSSER L'IMAGE DOCKER VERS ACR
+      - name: Push Docker image
+        run: |
+          docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:latest
+
+      # 6. DEPLOYER DES SERVICES LIES / PIPELINES DANS ADF
+      - name: Deploy ADF Linked Services
+        run: |
+          az datafactory linked-service create \
+            --factory-name $ADF_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --name kv-linked-service \
+            --properties @pipelines/linkedService-kv.json
+
+          az datafactory linked-service create \
+            --factory-name $ADF_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --name ls-sql-secure \
+            --properties @pipelines/linkedService-sql.json
+
+      # 7. DEPLLOYER PIPLINE JSON
+      - name: Deploy ADF pipeline
+        run: |
+          az datafactory pipeline create \
+            --factory-name $ADF_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --name pipeline-migration \
+            --pipeline @pipelines/pipeline.json
+
+      # 8. DECLENCHER LE PIPELINE IMMEDIATEMENT
+      - name: Run ADF pipeline
+        run: |
+          az datafactory pipeline create-run \
+            --factory-name $ADF_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --name pipeline-migration

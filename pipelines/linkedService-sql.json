@@ -1,0 +1,19 @@
+{
+  "name": "ls-sql-secure",
+  "properties": {
+    "type": "AzureSqlDatabase",
+    "typeProperties": {
+      "connectionString": "Server=tcp:sql-so26h3.database.windows.net,1433;Database=migration-db;",
+      "userName": "adminuser",
+      "password": {
+        "type": "AzureKeyVaultSecret",
+        "store": {
+          "referenceName": "kv-linked-service",
+          "type": "LinkedServiceReference"
+        },
+        "secretName": "sql-password"
+      }
+    }
+  }
+}
+
