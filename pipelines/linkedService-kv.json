@@ -1,5 +1,4 @@
 {
-  "name": "kv-linked-service",
   "properties": {
     "type": "AzureKeyVault",
     "typeProperties": {
