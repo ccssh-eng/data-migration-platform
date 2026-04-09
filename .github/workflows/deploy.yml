@@ -3,7 +3,7 @@ name: Deploy ETL to Azure
 on:
   push:
     branches:
-      - main       # DECLENCHE SUR CHAQUE PUSH VERS MAIN
+      - main
 
 env:
   ACR_NAME: ${{ secrets.ACR_NAME }}
@@ -43,32 +43,38 @@ jobs:
 
       # 6. DEPLOYER DES SERVICES LIES / PIPELINES DANS ADF
       - name: Deploy ADF Linked Services
+        if: always()
         run: |
+          set -x
           az datafactory linked-service create \
             --factory-name $ADF_NAME \
-            --resource-group $RESOURCE_GROUP \
+            --resource-group $RG_NAME \
             --name kv-linked-service \
             --properties @pipelines/linkedService-kv.json
 
           az datafactory linked-service create \
             --factory-name $ADF_NAME \
-            --resource-group $RESOURCE_GROUP \
+            --resource-group $RG_NAME \
             --name ls-sql-secure \
             --properties @pipelines/linkedService-sql.json
 
       # 7. DEPLLOYER PIPLINE JSON
       - name: Deploy ADF pipeline
+        if: always()
         run: |
+          set -x
           az datafactory pipeline create \
             --factory-name $ADF_NAME \
-            --resource-group $RESOURCE_GROUP \
+            --resource-group $RG_NAME \
             --name pipeline-migration \
             --pipeline @pipelines/pipeline.json
 
       # 8. DECLENCHER LE PIPELINE IMMEDIATEMENT
       - name: Run ADF pipeline
+        if: always()
         run: |
+          set -x
           az datafactory pipeline create-run \
             --factory-name $ADF_NAME \
-            --resource-group $RESOURCE_GROUP \
+            --resource-group $RG_NAME \
             --name pipeline-migration
