@@ -20,12 +20,14 @@ jobs:
       - name: Checkout main repo
         uses: actions/checkout@v3 
 
-      # 2.
+      # 2. Checkout ADF publish branch dans dossier séparé
       - name: Checkout ADF publish branch
         uses: actions/checkout@v3
         with:
+          repository: ${{ github.repository }}
           ref: adf_publish
           path: adf_publish
+          fetch-depth: 0
 
       # 3.
       - name: Login to Azure
@@ -66,5 +68,5 @@ jobs:
         run: |
           echo "=== ROOT ==="
           ls -R
-          echo "=== ADF ==="
-          ls -R adf_publish
+          echo "=== ADF_PUBLISH ==="
+          ls -R adf_publish || echo "Le dossier ADF n'a pas trouvé" 
