@@ -9,7 +9,6 @@ env:
   ACR_NAME: ${{ secrets.ACR_NAME }}
   IMAGE_NAME: data-migration
   RG_NAME: ${{ secrets.RG_NAME }}
-  ADF_NAME: ${{ secrets.ADF_NAME }}
   AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
 
 jobs:
@@ -17,71 +16,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. CHECKOUT CODE
+      # 1. Checkout
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. LOGIN AZURE
+      # 2. Login Azure
       - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # 3. CONSTRUIRE UNE IMAGE DOCKER
+      # 3. Build Docker
       - name: Build Docker image
         run: |
           docker build -t $ACR_NAME.azurecr.io/$IMAGE_NAME:latest .
 
-      # 4. CONNECTER A AZURE CONTAINER REGISTRY
+      # 4. Login ACR
       - name: Login to ACR
-        run: |
-          az acr login --name $ACR_NAME
+        run: az acr login --name $ACR_NAME
 
-      # 5. POUSSER L'IMAGE DOCKER VERS ACR
+      # 5. Push image
       - name: Push Docker image
+        run: docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:latest
+
+      # 6. Deploy ADF via ARM 
+      - name: Deploy Azure Data Factory (ARM)
         run: |
-          docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:latest
-
-      # 6. DEPLOYER DES SERVICES LIES / PIPELINES DANS ADF
-      - name: Deploy ADF Linked Services
-        if: always()
-        run: |
-          set -x
-          az datafactory linked-service create \
-            --factory-name $ADF_NAME \
+          az deployment group create \
             --resource-group $RG_NAME \
-            --name kv-linked-service \
-            --properties @pipelines/linkedService-kv.json
+            --template-file adf_publish/ARMTemplateForFactory.json \
+            --parameters adf_publish/ARMTemplateParametersForFactory.json
 
-          az datafactory linked-service create \
-            --factory-name $ADF_NAME \
-            --resource-group $RG_NAME \
-            --name ls-sql-secure \
-            --properties @pipelines/linkedService-sql.json
-
-      # 7. DEPLLOYER PIPLINE JSON
-      - name: Deploy ADF pipeline
-        if: always()
-        run: |
-          set -x
-          az datafactory pipeline create \
-            --factory-name $ADF_NAME \
-            --resource-group $RG_NAME \
-            --name pipeline-migration \
-            --pipeline @pipelines/pipeline.json
-
-      # 8. DECLENCHER LE PIPELINE IMMEDIATEMENT
+      # 7. Run pipeline
       - name: Run ADF pipeline
-        if: always()
         run: |
-          set -x
           az datafactory pipeline create-run \
-            --factory-name $ADF_NAME \
+            --factory-name $(jq -r '.parameters.factoryName.value' adf_publish/ARMTemplateParametersForFactory.json) \
             --resource-group $RG_NAME \
             --name pipeline-migration
-
-      - name: Debug env
-        run: |
-          echo "RG_NAME=$RG_NAME"
-          echo "ADF_NAME=$ADF_NAME"
-          echo "ACR_NAME=$ACR_NAME"
