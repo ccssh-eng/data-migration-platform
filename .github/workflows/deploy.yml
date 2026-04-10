@@ -49,20 +49,17 @@ jobs:
         run: |
           az deployment group create \
             --resource-group $RG_NAME \
-            --template-file adf_publish/ARMTemplateForFactory.json \
-            --parameters adf_publish/ARMTemplateParametersForFactory.json
+            --template-file adf_publish/adf-migration-so26h3/ARMTemplateForFactory.json \
+            --parameters adf_publish/adf-migration-so26h3/ARMTemplateParametersForFactory.json
 
       # 8.
       - name: Run ADF pipeline
         run: |
           az datafactory pipeline create-run \
-            --factory-name $(jq -r '.parameters.factoryName.value' adf_publish/ARMTemplateParametersForFactory.json) \
+            --factory-name $(jq -r '.parameters.factoryName.value' adf_publish/adf-migration-so26h3/ARMTemplateParametersForFactory.json) \
             --resource-group $RG_NAME \
             --name pipeline-migration
 
       - name: Debug files
         run: |
-          echo "=== ROOT ==="
-          ls -R
-          echo "=== ADF_PUBLISH ==="
-          ls -R adf_publish || echo "Le dossier ADF n'a pas trouvé" 
+          ls -R adf_publish
