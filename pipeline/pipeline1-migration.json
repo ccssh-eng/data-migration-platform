@@ -1,9 +1,9 @@
 {
-	"name": "pipeline-migration",
+	"name": "pipeline1-migration",
 	"properties": {
 		"activities": [
 			{
-				"name": "Run ETL Container",
+				"name": "Obtenir ETL Logs",
 				"type": "WebActivity",
 				"dependsOn": [],
 				"policy": {
@@ -14,13 +14,13 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"method": "PUT",
+					"method": "GET",
 					"headers": {
 						"Content-Type": "application/json"
 					},
-					"url": "https://management.azure.com/subscriptions/6684f3b2-db8e-4118-9d74-3c7d7b6e055f/resourceGroups/rg-data-migration/providers/Microsoft.ContainerInstance/containerGroups/etl-job?api-version=2021-09-01",
+					"url": "https://management.azure.com/subscriptions/6684f3b2-db8e-4118-9d74-3c7d7b6e055f/resourceGroups/rg-data-migration/providers/Microsoft.ContainerInstance/containerGroups/etl-job/containers/etl/logs?api-version=2021-09-01",
 					"body": {
-						"location": "westeurope",
+						"location": "francecentral",
 						"properties": {
 							"containers": [
 								{
@@ -37,8 +37,19 @@
 								}
 							],
 							"osType": "Linux",
-							"restartPolicy": "Never"
+							"restartPolicy": "Never",
+							"imageRegistryCredentials": [
+								{
+									"server": "myacr1826.azurecr.io",
+									"username": "myacr1826",
+									"password": "7EGMXjQfEYPavLfiIh3JIeZIk5TFMRTBKykSZn4stiSJHFMS1el1JQQJ99CDAC5T7U2Eqg7NAAACAZCRnD81"
+								}
+							]
 						}
+					},
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://management.azure.com/"
 					}
 				}
 			}
