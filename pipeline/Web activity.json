@@ -1,6 +1,28 @@
 {
 	"name": "Web activity",
 	"properties": {
+		"activities": [
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": "https://management.azure.com/subscriptions/6684f3b2-db8e-4118-9d74-3c7d7b6e055f/resourceGroups/rg-data-migration/providers/Microsoft.ContainerInstance/containerGroups/migration-container/start?api-version=2021-09-01",
+					"authentication": {
+						"type": "MSI"
+					}
+				}
+			}
+		],
 		"annotations": []
 	}
 }
