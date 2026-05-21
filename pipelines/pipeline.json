@@ -1,0 +1,39 @@
+{
+  "name": "pipeline-migration",
+  "properties": {
+    "activities": [
+      {
+        "name": "Run ETL Container",
+        "type": "WebActivity",
+        "typeProperties": {
+          "url": "https://management.azure.com/subscriptions/6684f3b2-db8e-4118-9d74-3c7d7b6e055f/resourceGroups/rg-data-migration/providers/Microsoft.ContainerInstance/containerGroups/etl-job?api-version=2021-09-01",
+          "method": "PUT",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "location": "westeurope",
+            "properties": {
+              "containers": [
+                {
+                  "name": "etl",
+                  "properties": {
+                    "image": "myacr1826.azurecr.io/data-migration:latest",
+                    "resources": {
+                      "requests": {
+                        "cpu": 1,
+                        "memoryInGb": 1.5
+                      }
+                    }
+                  }
+                }
+              ],
+              "osType": "Linux",
+              "restartPolicy": "Never"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

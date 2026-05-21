@@ -1,0 +1,9 @@
+{
+	"name": "adf-migration-so26h3",
+	"location": "francecentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "2347444b-445d-4a1f-8838-cb5cfeaf4961",
+		"tenantId": "38c482a3-9673-4119-bf8a-0c258bab2484"
+	}
+}
