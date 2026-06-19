@@ -1,7 +1,0 @@
-{
-  "type": "AzureKeyVault",
-  "typeProperties": {
-    "baseUrl": "https://kv-migration-platform.vault.azure.net/"
-  }
-}
-

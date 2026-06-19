@@ -1,0 +1,61 @@
+name: CI-CD Data Migration Platform
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  ACR_NAME: acr0cue2d
+  IMAGE_WORKER: data-worker
+  IMAGE_DLQ: dlq-monitor
+
+jobs:
+
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Login ACR
+      run: |
+        az acr login --name $ACR_NAME
+
+    # BUILD WORKER
+    - name: Build Worker
+      run: |
+        docker build -t $ACR_NAME.azurecr.io/$IMAGE_WORKER:${{ github.sha }} -f Dockerfile.worker .
+
+    - name: Push Worker
+      run: |
+        docker push $ACR_NAME.azurecr.io/$IMAGE_WORKER:${{ github.sha }}
+
+    # BUILD DLQ
+    - name: Build DLQ Monitor
+      run: |
+        docker build -t $ACR_NAME.azurecr.io/$IMAGE_DLQ:${{ github.sha }} -f Dockerfile.dlq .
+
+    - name: Push DLQ Monitor
+      run: |
+        docker push $ACR_NAME.azurecr.io/$IMAGE_DLQ:${{ github.sha }}
+
+    # DEPLOY CONTAINER APPS
+    - name: Deploy Worker
+      run: |
+        az containerapp update \
+          -g rg-data-migration \
+          -n worker-data-migration \
+          --image $ACR_NAME.azurecr.io/$IMAGE_WORKER:${{ github.sha }}
+
+    - name: Deploy DLQ Monitor
+      run: |
+        az containerapp update \
+          -g rg-data-migration \
+          -n dlq-monitor-data-migration \
+          --image $ACR_NAME.azurecr.io/$IMAGE_DLQ:${{ github.sha }}

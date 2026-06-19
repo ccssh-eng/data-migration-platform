@@ -1,7 +1,0 @@
-{
-    "type": "AzureSqlDatabase",
-    "typeProperties": {
-      "connectionString": "Server=tcp:sql-so26h3.database.windows.net,1433;Database=migration-db;",
-    }
-}
-

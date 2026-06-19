@@ -11,7 +11,7 @@ pytest
 ruff
 pre-commit
 psycopg2-binary
-python-dotenv
 testcontainers
 prometheus-client
 black
+aiohttp
