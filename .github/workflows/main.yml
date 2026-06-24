@@ -39,7 +39,7 @@ jobs:
     # BUILD DLQ
     - name: Build DLQ Monitor
       run: |
-        docker build -t $ACR_NAME.azurecr.io/$IMAGE_DLQ:${{ github.sha }} -f Dockerfile.monitor .
+        docker build -t $ACR_NAME.azurecr.io/$IMAGE_DLQ:${{ github.sha }} -f Dockerfile.dlq .
 
     - name: Push DLQ Monitor
       run: |

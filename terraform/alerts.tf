@@ -17,7 +17,7 @@ resource "azurerm_monitor_metric_alert" "dlq_alert" {
   criteria {
     metric_namespace = "Microsoft.ServiceBus/namespaces"
     metric_name      = "DeadletteredMessages"
-    aggregation      = "Total"
+    aggregation      = "Maximum"
     operator         = "GreaterThan"
     threshold        = 0
   }

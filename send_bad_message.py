@@ -9,7 +9,9 @@ from azure.servicebus import (
 credential = AzureCliCredential()
 
 payload = {
-    "test": "dlq"
+    "data": {
+        "url": "TEST_DLQ"
+    }
 }
 
 message = ServiceBusMessage(

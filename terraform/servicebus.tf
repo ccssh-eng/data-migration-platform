@@ -13,5 +13,6 @@ resource "azurerm_servicebus_topic" "topic" {
 resource "azurerm_servicebus_subscription" "sub" {
   name     = "etl-sub"
   topic_id = azurerm_servicebus_topic.topic.id
+  max_delivery_count = 10
 }
 

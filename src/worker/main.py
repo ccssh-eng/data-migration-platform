@@ -25,12 +25,15 @@ logging.warning("WORKER STARTED")
 
 namespace = os.environ["SERVICEBUS_NAMESPACE"]
 
+logging.error("WORKER VERSION DLQ TEST 2026-06-22")
 
 def process_message(msg):
 
     body = json.loads(
         b"".join(bytes(part) for part in msg.body).decode("utf-8")
     )
+
+    logging.warning(f"BODY={body}")
 
     blob_url = body.get("data", {}).get("url")
 
@@ -70,8 +73,12 @@ def main():
             for message in receiver:
                 logging.warning("MESSAGE RECU")
 
+                logging.error("INSIDE LOOP")
+
                 try:
                     # TESTER DLQ DIRECT
+                    logging.error("INSIDE NEW LOOP")
+
                     receiver.dead_letter_message(
                         message,
                         reason="test",

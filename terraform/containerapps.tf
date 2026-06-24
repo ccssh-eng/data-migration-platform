@@ -10,6 +10,8 @@ resource "azurerm_container_app" "worker" {
   resource_group_name          = azurerm_resource_group.rg.name
   container_app_environment_id = azurerm_container_app_environment.env.id
 
+  revision_mode = "Single"
+
   template {
     container {
       name   = "worker"
@@ -24,6 +26,8 @@ resource "azurerm_container_app" "dlq" {
   name                         = "dlq-monitor-data-migration"
   resource_group_name          = azurerm_resource_group.rg.name
   container_app_environment_id = azurerm_container_app_environment.env.id
+
+  revision_mode = "Single"
 
   template {
     container {
