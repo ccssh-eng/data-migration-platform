@@ -5,7 +5,7 @@
 .terraform.lock.hcl
 
 # Python
-venv/
+.venv/
 __pycache__/
 
 # Secrets
