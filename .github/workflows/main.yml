@@ -1,61 +1,95 @@
-name: CI-CD Data Migration Platform
+name: CI-CD Data Migration Platforme
 
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]  # tester aussi sur les PRs
 
 env:
   ACR_NAME: acr0cue2d
   IMAGE_WORKER: data-worker
   IMAGE_DLQ: dlq-monitor
+  RESOURCE_GROUP: rg-data-migration
 
 jobs:
-
-  build-and-deploy:
+  # --- JOB 1 : Tests unitaires --------------------------------
+  test:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
 
-    - name: Login ACR
-      run: |
-        az acr login --name $ACR_NAME
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-    # BUILD WORKER
-    - name: Build Worker
-      run: |
-        docker build -t $ACR_NAME.azurecr.io/$IMAGE_WORKER:${{ github.sha }} -f Dockerfile.worker .
+      - name: Run tests
+        run: pytest tests/ -v
 
-    - name: Push Worker
-      run: |
-        docker push $ACR_NAME.azurecr.io/$IMAGE_WORKER:${{ github.sha }}
+  # --- JOB 2 : Build & Push ----------------------------------
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: test  # seulement si les tests passent
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    # BUILD DLQ
-    - name: Build DLQ Monitor
-      run: |
-        docker build -t $ACR_NAME.azurecr.io/$IMAGE_DLQ:${{ github.sha }} -f Dockerfile.dlq .
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Push DLQ Monitor
-      run: |
-        docker push $ACR_NAME.azurecr.io/$IMAGE_DLQ:${{ github.sha }}
+      - name: Build & Push Worker via ACR
+        run: |
+          az acr build \
+            --registry $ACR_NAME \
+            --image $IMAGE_WORKER:${{ github.sha }} \
+            --image $IMAGE_WORKER:latest \
+            --file Dockerfile.worker .
 
-    # DEPLOY CONTAINER APPS
-    - name: Deploy Worker
-      run: |
-        az containerapp update \
-          -g rg-data-migration \
-          -n worker-data-migration \
-          --image $ACR_NAME.azurecr.io/$IMAGE_WORKER:${{ github.sha }}
+      - name: Build & Push DLQ Monitor via ACR
+        run: |
+          az acr build \
+            --registry $ACR_NAME \
+            --image $IMAGE_DLQ:${{ github.sha }} \
+            --image $IMAGE_DLQ:latest \
+            --file Dockerfile.dlq .
 
-    - name: Deploy DLQ Monitor
-      run: |
-        az containerapp update \
-          -g rg-data-migration \
-          -n dlq-monitor-data-migration \
-          --image $ACR_NAME.azurecr.io/$IMAGE_DLQ:${{ github.sha }}
+  # --- JOB 3 : Deploy -----------------------------------------
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push    # seulement si le build réussit
+    environment: production  # approbation manuelle optionnelle
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Worker
+        run: |
+          az containerapp update \
+            -g $RESOURCE_GROUP \
+            -n worker-data-migration \
+            --image $ACR_NAME.azurecr.io/$IMAGE_WORKER:${{ github.sha }}
+
+      - name: Deploy DLQ Monitor
+        run: |
+          az containerapp update \
+            -g $RESOURCE_GROUP \
+            -n dlq-monitor-data-migration \
+            --image $ACR_NAME.azurecr.io/$IMAGE_DLQ:${{ github.sha }}
+
+      - name: Vérifier le déploiement
+        run: |
+          az containerapp revision list \
+            -g $RESOURCE_GROUP \
+            -n worker-data-migration \
+            --query "[?properties.active].{nom: name, etat: properties.healthState}" \
+            --output table
+

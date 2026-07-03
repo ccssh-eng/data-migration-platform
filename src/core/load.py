@@ -1,62 +1,23 @@
 import os
 import struct
 import traceback
+import logging
 
-from sqlalchemy import create_engine, event
-from sqlalchemy.engine import URL
-from sqlalchemy import text
+from sqlalchemy import event, text
+
 from src.db import get_engine
-
 from src.auth import credential
+from src.core.idempotency import build_file_id
 
-from src.core.idempotency import (build_file_id)
 
-def load_to_sql(
-    engine,
-    df,
-    blob_url,
-    file_id
-):
-
-    server = os.getenv("SQL_SERVER")
-    database = os.getenv("SQL_DATABASE")
-
-    connection_url = URL.create(
-        "mssql+pyodbc",
-        host=server,
-        database=database,
-        query={
-            "driver": "ODBC Driver 18 for SQL Server",
-            "Encrypt": "yes",
-            "TrustServerCertificate": "no",
-        },
-    )
-
-    print(
-        connection_url.render_as_string(hide_password=False),
-        flush=True
-    )
-
-    engine = get_engine()
+def load_to_sql(engine, df, blob_url, file_id):
 
     @event.listens_for(engine, "do_connect")
     def provide_token(dialect, conn_rec, cargs, cparams):
 
         print("DO_CONNECT ENTER", flush=True)
-        print(
-            f"Chaîne de connexion ODBC avant le nettoyage: {cargs[0]}",
-            flush=True
-        )
 
-        cargs[0] = cargs[0].replace(
-            ";Trusted_Connection=Yes",
-            ""
-        )
-
-        print(
-            f"Chaîne de connexion ODBC après le nettoyage: {cargs[0]}",
-            flush=True
-        )
+        cargs[0] = cargs[0].replace(";Trusted_Connection=Yes", "")
 
         print("DEMANDE DE JETON SQL", flush=True)
 
@@ -66,34 +27,18 @@ def load_to_sql(
 
         print("JETON ACQUIS", flush=True)
 
-        print("SUR LE POINT D’APPELER PYODBC", flush=True)
-
-
         token_bytes = token.encode("utf-16-le")
-
         token_struct = struct.pack(
             f"<I{len(token_bytes)}s",
             len(token_bytes),
             token_bytes
         )
 
-        cparams["attrs_before"] = {
-            1256: token_struct
-        }
+        cparams["attrs_before"] = {1256: token_struct}
 
         print("JETON ATTACHE", flush=True)
-        print(
-            f"connexion au serveur SQL={server} database={database}",
-            flush=True
-        )
-
-        print(
-            f"DataFrame rows={len(df)} cols={list(df.columns)}",
-            flush=True
-        )
 
     try:
-        print("SUR LE POINT D'APPELER TO_SQL", flush=True)
         print("avant engine.connect", flush=True)
 
         with engine.connect() as conn:
@@ -110,34 +55,18 @@ def load_to_sql(
 
         print("TO_SQL REUSSI", flush=True)
 
-
         with engine.begin() as conn:
-
             conn.execute(
                 text("""
-                INSERT INTO processed_files
-                (
-                    file_id,
-                    blob_url
-                )
-                VALUES
-                (
-                    :file_id,
-                    :blob_url
-                )
+                    INSERT INTO processed_files (file_id, blob_url)
+                    VALUES (:file_id, :blob_url)
                 """),
-                {
-                    "file_id": file_id,
-                    "blob_url": blob_url
-                }
+                {"file_id": file_id, "blob_url": blob_url}
             )
 
-    except Exception as e:
+        logging.warning(f"{len(df)} lignes insérées")
 
+    except Exception as e:
         print(f"TO_SQL AVAIT ECHOUE: {e}", flush=True)
         traceback.print_exc()
         raise
-
-
-    print(f"{len(df)} lignes insérées")
-
