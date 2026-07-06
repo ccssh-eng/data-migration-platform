@@ -29,7 +29,9 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: pytest tests/ -v
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          pytest tests/ -v
 
   # --- JOB 2 : Build & Push ----------------------------------
   build-and-push:
