@@ -49,3 +49,4 @@ variable "acr_password" {
   sensitive   = true
 }
 
+
