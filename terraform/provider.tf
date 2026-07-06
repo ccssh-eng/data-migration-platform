@@ -11,7 +11,7 @@ terraform {
     resource_group_name  = "rg-tfstate"
     storage_account_name = "sttfstatecue2d"
     container_name       = "tfstate"
-    key                  = "data-migration.tfstate"
+    key                  = "data-migration-platform.tfstate"
   }
 }
 
