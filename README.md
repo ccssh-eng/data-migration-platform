@@ -38,37 +38,9 @@ Capture d'écrans :
           ![Tree](docs/screenshots/05_structure_arbre_1.png)
           ![Tree](docs/screenshots/06_structure_arbre_2.png)
           ![Tree](docs/screenshots/07_structure_arbre_3.png)
-
+          ![Arch](docs/screenshots/archit-dmp.drawio.png)
 Architecture :
-                                          DATA MIGRATION PLATFORM 
-----------------------------------------------------------------------------------------------------------------                                    
-                                                          
----------------                                ------------------                   ------------------------------------        
-  ADF                                             Blob Storage                          Azure Container    
-Pipeline             ---->                        raw/                                       Apps       
-02h UTC                                        -------------------                      
---------------                                            |                                 --------------------                
-                                                          v                                       Worker ETL   
-                                              ----------------------                              KEDA 0->5 
-                                                     Event Grid                              ---------------------                                                                           
-                                                     BlobCreated                                    |
-                                              -----------------------                               v               
-                                                           |                                  ------------------------   
-                                                           v                                         DLQ Monitor
-                                               
-                                               ----------------------                                Prometheus 
-                                                      Service Bus                              -------------------------                             
-                                                       etl-topic            --->                          |
-                                               -----------------------                                    v
-                                                                                               ----------------------------                                   
-                                                                                                      Azure SQL Database
-                                                                                                      customers          
-                                                                                                      processed_files 
-                                                                                                ----------------------------
-                                                                                        -----------------------------------------                                                                                                 
-   ------------------------------------------------------------------------------------------------------------------------
-                           Azure Monitor | Log Analytics | Alertes | Dashboard  
-   ------------------------------------------------------------------------------------------------------------------------
+          ![Arch](docs/screenshots/archit-dmp.drawio.png)
 Flux de données :
 
 1. ADF Pipeline (cron 02h00 UTC)
