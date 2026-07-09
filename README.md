@@ -38,9 +38,10 @@ Capture d'écrans :
           ![Tree](docs/screenshots/05_structure_arbre_1.png)
           ![Tree](docs/screenshots/06_structure_arbre_2.png)
           ![Tree](docs/screenshots/07_structure_arbre_3.png)
-          ![Arch](docs/screenshots/archit-dmp.drawio.png)
+
 Architecture :
           ![Arch](docs/screenshots/archit-dmp.drawio.png)
+
 Flux de données :
 
 1. ADF Pipeline (cron 02h00 UTC)
