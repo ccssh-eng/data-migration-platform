@@ -34,12 +34,7 @@ Capture d'écrans :
           ![DLQ](docs/screenshots/03_service_bus_dlq.png)
 4. Azure Container Apps
           ![Container Apps](docs/screenshots/04_container_apps_status.png)
-5. Structure du projet
-          ![Tree](docs/screenshots/05_structure_arbre_1.png)
-          ![Tree](docs/screenshots/06_structure_arbre_2.png)
-          ![Tree](docs/screenshots/07_structure_arbre_3.png)
-
-Architecture :
+5. Architecture :
           ![Arch](docs/screenshots/archit-dmp.drawio.png)
 
 Flux de données :
