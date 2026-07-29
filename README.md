@@ -25,16 +25,7 @@ Objectifs atteints :
 - Supervision proactive avec alertes automatiques
 - Infrastructure reproductible et versionnée (Terraform)
 
-Capture d'écrans :
-1. Dashboard Azure Monitor
-          ![Dashboard](docs/screenshots/01_dashboard_azure_monitor.png)
-2. CI/CD GitHub Actions
-          ![CI/CD](docs/screenshots/02_github_actions_pipeline.png)
-3. Service Bus — Dead Letter Queue
-          ![DLQ](docs/screenshots/03_service_bus_dlq.png)
-4. Azure Container Apps
-          ![Container Apps](docs/screenshots/04_container_apps_status.png)
-5. Architecture :
+Architecture :
           ![Arch](docs/screenshots/archit-dmp.drawio.png)
 
 Flux de données :
@@ -139,11 +130,6 @@ active-messages-alert	ActiveMessages > 10                Warning
 worker-restart-alert	RestartCount > 3	           Critical
 worker-cpu-alert	CPU > 80%	                   Warning
 worker-memory-alert	Memory > 80%	                   Warning
-
-Mes ressources sur Azure Cloud :
-    ![Tree](docs/screenshots/08_Azure_ressources_1.png)
-    ![Tree](docs/screenshots/09_Azure_ressources_2.png)
-    ![Tree](docs/screenshots/10_Azure_ressources_3.png)
 
 Commandes utiles :
 # Logs Worker en direct :
